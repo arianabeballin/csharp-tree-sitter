@@ -15,33 +15,36 @@ git clone https://github.com/tree-sitter/csharp-tree-sitter.git --recursive
 ## Building
 
 Requirements:
-- Windows-only (the Makefile in the `tree-sitter` has OS-specific stuff in it so far)
-- .NET 7
+- Windows with MSVC command-line tools (`cl` and `nmake`) available
+- .NET 7 SDK
 
-We'll first need to build the dependencies, and then the C# project.
-
-- get dependencies built
-  - `cd tree-sitter`
-  - `nmake`
-  - `cd ..`
-- `dotnet build csharp-tree-sitter.csproj`
-
-## Testing
-
-A good demo is the following, it is a test written in c# which walks the AST tree in post order by calling `tree-sitter-cpp` parser with these bindings.
-
-Assuming you're in VS Code:
-- navigate to a C++ file to be parsed
-- press `F5` to run with the default 'launch' configuration
-
-Otherwise, you may manually run with:
+Build the native tree-sitter DLLs first, then build the C# project:
 
 ```cmd
-csharp-tree-sitter.exe -files [your test cpp files]
+cd tree-sitter
+nmake
+cd ..
+dotnet build csharp-tree-sitter.csproj
 ```
 
-TODO: continue here
+The native build writes `tree-sitter.dll` and `tree-sitter-cpp.dll` to `bin\Debug\net7.0`, which is where the C# app and VS Code launch configuration expect them.
+
+## Running the parser demo
+
+The sample in `tests/test.cs` walks a parse tree using the `tree-sitter-cpp` grammar through these bindings.
+
+Assuming you're in VS Code:
+- open `.vscode/launch.json`
+- replace the placeholder `"path"` argument with one or more real C/C++ file paths
+- press `F5` and choose the `test` launch configuration
+
+From a terminal, run the built assembly directly:
+
+```cmd
+dotnet bin\Debug\net7.0\csharp-tree-sitter.dll -files [your test cpp files]
+```
 
 ## Contributing
 
-TODO: Explain how other users and developers can contribute to make your code better.
+- Keep submodules up to date (see `/tree-sitter/README.md`).
+- Ensure `nmake` and `dotnet build` both succeed before opening a change.
